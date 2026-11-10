@@ -1,0 +1,6 @@
+bin/
+models/
+__pycache__/
+*.pyc
+.venv/
+download.log
