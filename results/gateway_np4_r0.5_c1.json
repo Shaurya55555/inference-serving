@@ -1,0 +1,15 @@
+{
+  "label": "gateway_np4_r0.5_c1",
+  "repeat": 0.5,
+  "rows": [
+    {
+      "concurrency": 1,
+      "requests": 48,
+      "wall_s": 22.39,
+      "req_per_s": 2.14,
+      "tok_per_s": 176.5,
+      "p50_ms": 564,
+      "p95_ms": 957
+    }
+  ]
+}

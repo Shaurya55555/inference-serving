@@ -1,0 +1,15 @@
+{
+  "label": "direct_np1_c1",
+  "repeat": 0.0,
+  "rows": [
+    {
+      "concurrency": 1,
+      "requests": 48,
+      "wall_s": 52.82,
+      "req_per_s": 0.91,
+      "tok_per_s": 68.6,
+      "p50_ms": 1106,
+      "p95_ms": 1486
+    }
+  ]
+}

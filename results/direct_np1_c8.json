@@ -1,0 +1,15 @@
+{
+  "label": "direct_np1_c8",
+  "repeat": 0.0,
+  "rows": [
+    {
+      "concurrency": 8,
+      "requests": 48,
+      "wall_s": 52.94,
+      "req_per_s": 0.91,
+      "tok_per_s": 68.8,
+      "p50_ms": 8668,
+      "p95_ms": 9849
+    }
+  ]
+}

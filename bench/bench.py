@@ -39,6 +39,8 @@ async def one(client, url, prompt, max_tokens, path):
 async def run(url, n, conc, repeat, max_tokens, path):
     sem = asyncio.Semaphore(conc)
     async with httpx.AsyncClient(timeout=300) as c:
+        # warm-up with prompts outside the benchmark set, so the first timed request is not cold
+        await asyncio.gather(*[one(c, url, f"Say the number {i}.", 8, path) for i in range(conc)])
         async def guarded(p):
             async with sem:
                 return await one(c, url, p, max_tokens, path)
