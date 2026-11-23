@@ -47,7 +47,21 @@ Counters in `/metrics` also include the warm-up requests.
     UPSTREAM=http://127.0.0.1:8080 uvicorn gateway.app:app --port 8000
     python bench/bench.py --url http://127.0.0.1:8000 --label gateway --conc 8 --repeat 0.5
 
-Raw per-run results are in `results/`.
+Raw per-run results are in `results/`. Tests: `pytest` (12 tests, upstream is faked).
+
+## Failure handling
+| situation | behavior |
+|---|---|
+| upstream returns a non-200 (for example 503 when all slots are busy) | the same status and the first 300 characters of the body are returned to the client |
+| upstream unreachable (connection refused, DNS) | HTTP 502 `upstream unreachable` |
+| upstream slower than 300 s | HTTP 504 `upstream timed out` |
+| several identical requests merged onto one failing upstream call | all of them receive the same error; nothing is cached and the in-flight entry is removed |
+| empty `messages`, `max_tokens` outside 1 to 4096, `temperature` outside 0 to 2 | HTTP 422 before any upstream call |
+| more than `MAX_INFLIGHT` concurrent upstream calls | extra requests queue on a semaphore; they are not rejected |
+| sampled requests (temperature above 0) | never cached and never merged |
+
+Not handled yet: no retries, no second provider and no circuit breaker (the multi-provider gateway work adds these), and
+no streaming.
 
 ## Limits and honesty notes
 - llama.cpp, not vLLM: vLLM does not run natively on Windows. The serving concepts measured here

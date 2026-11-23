@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from gateway import app as g  # noqa: E402
 
+REAL_UPSTREAM = g.call_upstream
+
 
 @pytest.fixture(autouse=True)
 def fresh(monkeypatch):
@@ -68,3 +70,46 @@ def test_concurrent_identical_requests_merge(fresh):
     out = asyncio.run(go())
     assert fresh["n"] == 1
     assert sorted(o["gateway"]["cache"] for o in out) == ["merged"] * 4 + ["miss"]
+
+
+def test_upstream_error_is_passed_through_and_not_cached(monkeypatch, fresh):
+    async def failing(req):
+        raise g.HTTPException(503, "busy")
+
+    monkeypatch.setattr(g, "call_upstream", failing)
+    c = TestClient(g.app)
+    assert c.post("/v1/chat/completions", json=body()).status_code == 503
+    assert not g.cache and not g.inflight
+
+
+def test_merged_waiters_all_see_the_failure(monkeypatch, fresh):
+    async def failing(req):
+        await asyncio.sleep(0.05)
+        raise g.HTTPException(503, "busy")
+
+    monkeypatch.setattr(g, "call_upstream", failing)
+
+    async def go():
+        req = g.Chat(**body("same"))
+        return await asyncio.gather(*[g.chat(req) for _ in range(4)], return_exceptions=True)
+
+    out = asyncio.run(go())
+    assert all(isinstance(o, g.HTTPException) and o.status_code == 503 for o in out)
+    assert not g.cache and not g.inflight
+
+
+@pytest.mark.parametrize("exc,status", [(g.httpx.ConnectError("x"), 502), (g.httpx.ReadTimeout("x"), 504)])
+def test_transport_errors_map_to_gateway_statuses(monkeypatch, exc, status):
+    async def post(*a, **k):
+        raise exc
+
+    monkeypatch.setattr(g, "call_upstream", REAL_UPSTREAM)
+    monkeypatch.setattr(g.client, "post", post)
+    c = TestClient(g.app)
+    assert c.post("/v1/chat/completions", json=body("unique-" + str(status))).status_code == status
+
+
+@pytest.mark.parametrize("bad", [{"messages": []}, {"messages": [{"role": "user", "content": "x"}], "max_tokens": 0},
+                                 {"messages": [{"role": "user", "content": "x"}], "temperature": 9}])
+def test_bad_input_is_rejected_with_422(bad):
+    assert TestClient(g.app).post("/v1/chat/completions", json=bad).status_code == 422

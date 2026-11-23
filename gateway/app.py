@@ -14,7 +14,7 @@ from collections import OrderedDict
 
 import httpx
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 UPSTREAM = os.getenv("UPSTREAM", "http://127.0.0.1:8080")
 CACHE_SIZE = int(os.getenv("CACHE_SIZE", "512"))
@@ -29,9 +29,9 @@ stats = {"requests": 0, "cache_hits": 0, "merged": 0, "upstream_calls": 0, "comp
 
 
 class Chat(BaseModel):
-    messages: list[dict]
-    max_tokens: int = 128
-    temperature: float = 0.0
+    messages: list[dict] = Field(min_length=1)
+    max_tokens: int = Field(128, ge=1, le=4096)
+    temperature: float = Field(0.0, ge=0, le=2)
 
 
 def key_of(req: Chat) -> str:
@@ -41,7 +41,12 @@ def key_of(req: Chat) -> str:
 async def call_upstream(req: Chat) -> dict:
     async with sem:
         stats["upstream_calls"] += 1
-        r = await client.post(f"{UPSTREAM}/v1/chat/completions", json=req.model_dump())
+        try:
+            r = await client.post(f"{UPSTREAM}/v1/chat/completions", json=req.model_dump())
+        except httpx.TimeoutException:
+            raise HTTPException(504, "upstream timed out")
+        except httpx.TransportError:
+            raise HTTPException(502, "upstream unreachable")
     if r.status_code != 200:
         raise HTTPException(r.status_code, r.text[:300])
     return r.json()
