@@ -105,3 +105,5 @@ sampled requests (temperature above 0) are never cached or merged. Not handled: 
 - The cache is exact-match only; no semantic caching, no eviction by token cost, no streaming support in the gateway.
 - An earlier pass reused one gateway process across concurrency levels, which made later rows near-100% cache hits;
   rows above use a fresh gateway each, and that run is discarded.
+
+Write-up: [The benchmark that lied](docs/the-benchmark-that-lied.md)
