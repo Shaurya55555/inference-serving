@@ -47,21 +47,55 @@ Counters in `/metrics` also include the warm-up requests.
     UPSTREAM=http://127.0.0.1:8080 uvicorn gateway.app:app --port 8000
     python bench/bench.py --url http://127.0.0.1:8000 --label gateway --conc 8 --repeat 0.5
 
-Raw per-run results are in `results/`. Tests: `pytest` (12 tests, upstream is faked).
+Raw per-run results are in `results/`. 
 
-## Failure handling
-| situation | behavior |
+## Multi-provider failover
+`gateway/router.py` routes each request through providers in priority order (`PROVIDERS_FILE`, see `gateway/providers.py`;
+without it the gateway uses the single local server as before). Per provider: a token-bucket rate limit (`rpm`),
+retries with jittered exponential backoff, and a circuit breaker (opens after 5 consecutive failures, one probe after a cooldown).
+
+| outcome of one attempt | behavior |
 |---|---|
-| upstream returns a non-200 (for example 503 when all slots are busy) | the same status and the first 300 characters of the body are returned to the client |
-| upstream unreachable (connection refused, DNS) | HTTP 502 `upstream unreachable` |
-| upstream slower than 300 s | HTTP 504 `upstream timed out` |
-| several identical requests merged onto one failing upstream call | all of them receive the same error; nothing is cached and the in-flight entry is removed |
+| 2xx with a usable body | return it, `served_by` names the provider |
+| 429, 500, 502, 503, 504, timeout, connection error, unusable 200 body | retry on the same provider with backoff, then fail over |
+| 429 with `Retry-After` of 2 s or less | wait that long and retry; a longer one fails over immediately instead of blocking the request |
+| 401, 403, 404 (misconfigured provider) | no retry, fail over |
+| 400, 413, 422 (bad request) | returned to the client, never sent to another provider |
+| circuit open, or rate-limit tokens exhausted | provider skipped without a network call |
+| every provider failed | HTTP 503 with a per-provider list of what happened (no keys in it) |
 | empty `messages`, `max_tokens` outside 1 to 4096, `temperature` outside 0 to 2 | HTTP 422 before any upstream call |
-| more than `MAX_INFLIGHT` concurrent upstream calls | extra requests queue on a semaphore; they are not rejected |
-| sampled requests (temperature above 0) | never cached and never merged |
 
-Not handled yet: no retries, no second provider and no circuit breaker (the multi-provider gateway work adds these), and
-no streaming.
+`min_max_tokens` per provider raises small token budgets for reasoning models (they spend the budget on hidden reasoning and return an empty answer).
+`/metrics` includes per-provider attempts, failures, retries, skips and circuit state. API keys are read from env vars named in the file.
+Cache and request merging are unchanged; a cache hit reports the provider that originally answered.
+
+Tests: `pytest` runs 61 tests with scripted providers and a fake clock (retry, failover, Retry-After, every status class, circuit
+open / half-open / recovery, rate limiting, 40 concurrent requests during an outage, HTTP layer through `httpx.MockTransport`).
+
+### Failover load test (simulated outage, real providers)
+`bench/failover_bench.py`: 42 requests at 0.7 req/s over 60 s, cache off, 48 max tokens. Primary = real local llama-server
+(Qwen2.5-1.5B Q4_K_M, RTX 4060) behind `bench/fault_proxy.py`, which returns HTTP 503 for every request from t=20 s to t=40 s.
+Fallback = Groq `openai/gpt-oss-20b` (free tier, configured at 30 requests/min). Three gateway configurations, one run each:
+baseline (first provider only, one attempt, as the gateway behaved before this work), retry (first provider only, 3 attempts), failover (all features).
+
+| arm | success before / during / after outage | overall success | p50 ms | p95 ms (successful requests) |
+|---|---|---|---|---|
+| baseline | 14/14, 0/14, 14/14 | 28/42 = 66.7% | 425 | 651 |
+| retry only | 14/14, 0/14, 14/14 | 28/42 = 66.7% | 435 | 643 |
+| **failover** | 14/14, **14/14**, 13/14 | **41/42 = 97.6%** | 587 | 991 |
+
+During the outage the failover arm answered all 14 requests from Groq (p50 819 ms, p95 995 ms vs 478 ms local before). Retries alone did
+not help because the outage outlasted them; the circuit breaker opened and later requests skipped the dead provider without waiting.
+The single failure in the failover arm came just after recovery: the primary's circuit was still open and Groq's configured 30 requests/min
+budget was used up (offered load was 42/min), so the rate limiter refused the request. That is the limiter working, and it shows the fallback must be sized for the load.
+Raw files: `results/failover_*.json`. Caveats: the outage is simulated (the provider keeps running, only the proxy returns 503), one run per arm, 42 requests per arm,
+and only the fast-failure outage kind was run (a hanging provider was not measured). A first baseline run was discarded because it overlapped with a
+large package install on the same machine and stalled all processes; all three arms were re-run on an idle machine.
+
+## Failure handling (single local provider, no `PROVIDERS_FILE`)
+Same router with one provider: a dead upstream is retried, then reported as HTTP 503 listing the outcome; bad upstream statuses
+follow the table above; several identical requests merged onto one failing call all receive the same error and nothing is cached;
+sampled requests (temperature above 0) are never cached or merged. Not handled: streaming.
 
 ## Limits and honesty notes
 - llama.cpp, not vLLM: vLLM does not run natively on Windows. The serving concepts measured here

@@ -1,0 +1,412 @@
+{
+  "summary": {
+    "arm": "retry",
+    "requests": 42,
+    "rate_rps": 0.7,
+    "duration_s": 60,
+    "outage_window_s": [
+      20,
+      40
+    ],
+    "fault_mode": "down",
+    "phases": {
+      "before": {
+        "n": 14,
+        "success": 14,
+        "success_rate": 1.0,
+        "p50_ms": 435,
+        "p95_ms": 558,
+        "p50_ms_all_requests": 435,
+        "p95_ms_all_requests": 558,
+        "served_by": {
+          "local": 14
+        }
+      },
+      "during": {
+        "n": 14,
+        "success": 0,
+        "success_rate": 0.0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "p50_ms_all_requests": 419,
+        "p95_ms_all_requests": 539,
+        "served_by": {}
+      },
+      "after": {
+        "n": 14,
+        "success": 14,
+        "success_rate": 1.0,
+        "p50_ms": 397,
+        "p95_ms": 644,
+        "p50_ms_all_requests": 397,
+        "p95_ms_all_requests": 644,
+        "served_by": {
+          "local": 14
+        }
+      },
+      "all": {
+        "n": 42,
+        "success": 28,
+        "success_rate": 0.667,
+        "p50_ms": 435,
+        "p95_ms": 643,
+        "p50_ms_all_requests": 435,
+        "p95_ms_all_requests": 643,
+        "served_by": {
+          "local": 28
+        }
+      }
+    },
+    "gateway_providers": {
+      "local": {
+        "circuit": "closed",
+        "circuit_opened": 0,
+        "attempts": 71,
+        "successes": 29,
+        "failures": 42,
+        "retries": 28,
+        "skipped_circuit_open": 0,
+        "skipped_rate_limited": 0,
+        "last_error": "HTTP 503"
+      }
+    }
+  },
+  "requests": [
+    {
+      "i": 0,
+      "offset": 0.0,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.443
+    },
+    {
+      "i": 1,
+      "offset": 1.44,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.435
+    },
+    {
+      "i": 2,
+      "offset": 2.86,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.643
+    },
+    {
+      "i": 3,
+      "offset": 4.29,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.377
+    },
+    {
+      "i": 4,
+      "offset": 5.72,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.46
+    },
+    {
+      "i": 5,
+      "offset": 7.16,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.553
+    },
+    {
+      "i": 6,
+      "offset": 8.58,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.319
+    },
+    {
+      "i": 7,
+      "offset": 10.02,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.558
+    },
+    {
+      "i": 8,
+      "offset": 11.44,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.513
+    },
+    {
+      "i": 9,
+      "offset": 12.86,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.438
+    },
+    {
+      "i": 10,
+      "offset": 14.3,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.237
+    },
+    {
+      "i": 11,
+      "offset": 15.72,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.297
+    },
+    {
+      "i": 12,
+      "offset": 17.16,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.316
+    },
+    {
+      "i": 13,
+      "offset": 18.58,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.362
+    },
+    {
+      "i": 14,
+      "offset": 20.05,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.515
+    },
+    {
+      "i": 15,
+      "offset": 21.44,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.413
+    },
+    {
+      "i": 16,
+      "offset": 22.86,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.293
+    },
+    {
+      "i": 17,
+      "offset": 24.3,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.697
+    },
+    {
+      "i": 18,
+      "offset": 25.73,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.517
+    },
+    {
+      "i": 19,
+      "offset": 27.16,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.535
+    },
+    {
+      "i": 20,
+      "offset": 28.57,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.152
+    },
+    {
+      "i": 21,
+      "offset": 30.01,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.419
+    },
+    {
+      "i": 22,
+      "offset": 31.44,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.45
+    },
+    {
+      "i": 23,
+      "offset": 32.86,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.539
+    },
+    {
+      "i": 24,
+      "offset": 34.3,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.277
+    },
+    {
+      "i": 25,
+      "offset": 35.72,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.341
+    },
+    {
+      "i": 26,
+      "offset": 37.16,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.299
+    },
+    {
+      "i": 27,
+      "offset": 38.58,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"failed: HTTP 503\"}]}}",
+      "latency": 0.441
+    },
+    {
+      "i": 28,
+      "offset": 40.02,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.772
+    },
+    {
+      "i": 29,
+      "offset": 41.43,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.601
+    },
+    {
+      "i": 30,
+      "offset": 42.86,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.31
+    },
+    {
+      "i": 31,
+      "offset": 44.29,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.305
+    },
+    {
+      "i": 32,
+      "offset": 45.73,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.435
+    },
+    {
+      "i": 33,
+      "offset": 47.16,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.588
+    },
+    {
+      "i": 34,
+      "offset": 48.58,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.387
+    },
+    {
+      "i": 35,
+      "offset": 50.01,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.633
+    },
+    {
+      "i": 36,
+      "offset": 51.44,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.397
+    },
+    {
+      "i": 37,
+      "offset": 52.87,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.379
+    },
+    {
+      "i": 38,
+      "offset": 54.3,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.644
+    },
+    {
+      "i": 39,
+      "offset": 55.72,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.641
+    },
+    {
+      "i": 40,
+      "offset": 57.14,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.278
+    },
+    {
+      "i": 41,
+      "offset": 58.57,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.395
+    }
+  ]
+}

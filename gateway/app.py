@@ -1,9 +1,11 @@
-"""FastAPI gateway in front of llama.cpp's llama-server (OpenAI-compatible).
+"""FastAPI gateway in front of one or more OpenAI-compatible providers (llama.cpp's llama-server, Groq, Gemini, ...).
 
-Adds: exact-match LRU response cache (deterministic requests only), merging of identical
-in-flight requests, a concurrency cap, and /metrics.
+Adds: exact-match LRU response cache (deterministic requests only), merging of identical in-flight requests,
+multi-provider failover (priority order, retries with backoff, per-provider rate limits, circuit breakers) and /metrics.
 
-UPSTREAM=http://127.0.0.1:8080 uvicorn gateway.app:app --port 8000
+UPSTREAM=http://127.0.0.1:8080 uvicorn gateway.app:app --port 8000                 # one local provider, as before
+PROVIDERS_FILE=providers.json uvicorn gateway.app:app --port 8000                  # local first, cloud as fallback
+Tuning env vars: FAILOVER=0|1, BREAKER=0|1, MAX_ATTEMPTS=n, BREAKER_THRESHOLD, BREAKER_COOLDOWN, DEADLINE_S.
 """
 import asyncio
 import hashlib
@@ -16,13 +18,30 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-UPSTREAM = os.getenv("UPSTREAM", "http://127.0.0.1:8080")
+from .providers import load_providers
+from .router import AllProvidersFailed, ClientError, FailoverRouter, RouterConfig
+
 CACHE_SIZE = int(os.getenv("CACHE_SIZE", "512"))
-MAX_INFLIGHT = int(os.getenv("MAX_INFLIGHT", "8"))
 
 app = FastAPI(title="inference-gateway")
 client = httpx.AsyncClient(timeout=300)
-sem = asyncio.Semaphore(MAX_INFLIGHT)
+
+
+def flag(name: str, default: bool) -> bool:
+    return os.getenv(name, "1" if default else "0").strip().lower() not in ("0", "false", "no", "")
+
+
+def build_router() -> FailoverRouter:
+    cfg = RouterConfig(
+        failover=flag("FAILOVER", True), breaker=flag("BREAKER", True),
+        max_attempts=int(os.environ["MAX_ATTEMPTS"]) if os.getenv("MAX_ATTEMPTS") else None,
+        breaker_threshold=int(os.getenv("BREAKER_THRESHOLD", "5")),
+        breaker_cooldown=float(os.getenv("BREAKER_COOLDOWN", "10")),
+        deadline_s=float(os.getenv("DEADLINE_S", "60")))
+    return FailoverRouter(load_providers(), cfg, client=client)
+
+
+router = build_router()
 cache: OrderedDict[str, dict] = OrderedDict()
 inflight: dict[str, asyncio.Future] = {}
 stats = {"requests": 0, "cache_hits": 0, "merged": 0, "upstream_calls": 0, "completion_tokens": 0}
@@ -39,17 +58,15 @@ def key_of(req: Chat) -> str:
 
 
 async def call_upstream(req: Chat) -> dict:
-    async with sem:
-        stats["upstream_calls"] += 1
-        try:
-            r = await client.post(f"{UPSTREAM}/v1/chat/completions", json=req.model_dump())
-        except httpx.TimeoutException:
-            raise HTTPException(504, "upstream timed out")
-        except httpx.TransportError:
-            raise HTTPException(502, "upstream unreachable")
-    if r.status_code != 200:
-        raise HTTPException(r.status_code, r.text[:300])
-    return r.json()
+    """Send the request through the failover router. The provider that answered is returned as `served_by`."""
+    stats["upstream_calls"] += 1
+    try:
+        data, route = await router.complete(req.model_dump())
+    except ClientError as e:
+        raise HTTPException(e.status, e.body)
+    except AllProvidersFailed as e:
+        raise HTTPException(503, {"error": "all providers failed", "tried": e.tried})
+    return {**data, "served_by": route.provider}
 
 
 @app.post("/v1/chat/completions")
@@ -91,4 +108,5 @@ def metrics():
     s = dict(stats)
     s["cache_hit_rate"] = round(s["cache_hits"] / max(1, s["requests"]), 3)
     s["cache_entries"] = len(cache)
+    s["providers"] = router.snapshot()
     return s

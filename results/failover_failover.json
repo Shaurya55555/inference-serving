@@ -1,0 +1,427 @@
+{
+  "summary": {
+    "arm": "failover",
+    "requests": 42,
+    "rate_rps": 0.7,
+    "duration_s": 60,
+    "outage_window_s": [
+      20,
+      40
+    ],
+    "fault_mode": "down",
+    "phases": {
+      "before": {
+        "n": 14,
+        "success": 14,
+        "success_rate": 1.0,
+        "p50_ms": 478,
+        "p95_ms": 626,
+        "p50_ms_all_requests": 478,
+        "p95_ms_all_requests": 626,
+        "served_by": {
+          "local": 14
+        }
+      },
+      "during": {
+        "n": 14,
+        "success": 14,
+        "success_rate": 1.0,
+        "p50_ms": 819,
+        "p95_ms": 995,
+        "p50_ms_all_requests": 819,
+        "p95_ms_all_requests": 995,
+        "served_by": {
+          "groq": 14
+        }
+      },
+      "after": {
+        "n": 14,
+        "success": 13,
+        "success_rate": 0.929,
+        "p50_ms": 548,
+        "p95_ms": 852,
+        "p50_ms_all_requests": 498,
+        "p95_ms_all_requests": 852,
+        "served_by": {
+          "groq": 2,
+          "local": 11
+        }
+      },
+      "all": {
+        "n": 42,
+        "success": 41,
+        "success_rate": 0.976,
+        "p50_ms": 587,
+        "p95_ms": 991,
+        "p50_ms_all_requests": 572,
+        "p95_ms_all_requests": 922,
+        "served_by": {
+          "local": 25,
+          "groq": 16
+        }
+      }
+    },
+    "gateway_providers": {
+      "local": {
+        "circuit": "closed",
+        "circuit_opened": 4,
+        "attempts": 32,
+        "successes": 26,
+        "failures": 6,
+        "retries": 1,
+        "skipped_circuit_open": 12,
+        "skipped_rate_limited": 0,
+        "last_error": "HTTP 503"
+      },
+      "groq": {
+        "circuit": "closed",
+        "circuit_opened": 0,
+        "attempts": 16,
+        "successes": 16,
+        "failures": 0,
+        "retries": 0,
+        "skipped_circuit_open": 0,
+        "skipped_rate_limited": 1,
+        "last_error": ""
+      }
+    }
+  },
+  "requests": [
+    {
+      "i": 0,
+      "offset": 0.0,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.533
+    },
+    {
+      "i": 1,
+      "offset": 1.43,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.341
+    },
+    {
+      "i": 2,
+      "offset": 2.87,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.705
+    },
+    {
+      "i": 3,
+      "offset": 4.29,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.418
+    },
+    {
+      "i": 4,
+      "offset": 5.72,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.478
+    },
+    {
+      "i": 5,
+      "offset": 7.14,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.625
+    },
+    {
+      "i": 6,
+      "offset": 8.58,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.314
+    },
+    {
+      "i": 7,
+      "offset": 10.01,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.626
+    },
+    {
+      "i": 8,
+      "offset": 11.43,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.615
+    },
+    {
+      "i": 9,
+      "offset": 12.86,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.411
+    },
+    {
+      "i": 10,
+      "offset": 14.3,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.479
+    },
+    {
+      "i": 11,
+      "offset": 15.72,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.587
+    },
+    {
+      "i": 12,
+      "offset": 17.15,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.354
+    },
+    {
+      "i": 13,
+      "offset": 18.58,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.457
+    },
+    {
+      "i": 14,
+      "offset": 20.06,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 1.534
+    },
+    {
+      "i": 15,
+      "offset": 21.44,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.991
+    },
+    {
+      "i": 16,
+      "offset": 22.87,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.507
+    },
+    {
+      "i": 17,
+      "offset": 24.29,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.543
+    },
+    {
+      "i": 18,
+      "offset": 25.73,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.572
+    },
+    {
+      "i": 19,
+      "offset": 27.15,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.819
+    },
+    {
+      "i": 20,
+      "offset": 28.58,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.922
+    },
+    {
+      "i": 21,
+      "offset": 30.02,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.914
+    },
+    {
+      "i": 22,
+      "offset": 31.44,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.481
+    },
+    {
+      "i": 23,
+      "offset": 32.86,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.65
+    },
+    {
+      "i": 24,
+      "offset": 34.3,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.791
+    },
+    {
+      "i": 25,
+      "offset": 35.72,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.995
+    },
+    {
+      "i": 26,
+      "offset": 37.15,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.872
+    },
+    {
+      "i": 27,
+      "offset": 38.59,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.912
+    },
+    {
+      "i": 28,
+      "offset": 40.05,
+      "status": 503,
+      "served_by": null,
+      "error": "{\"detail\":{\"error\":\"all providers failed\",\"tried\":[{\"provider\":\"local\",\"outcome\":\"skipped: circuit open\"},{\"provider\":\"g",
+      "latency": 0.028
+    },
+    {
+      "i": 29,
+      "offset": 41.44,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.702
+    },
+    {
+      "i": 30,
+      "offset": 42.87,
+      "status": 200,
+      "served_by": "groq",
+      "error": null,
+      "latency": 0.868
+    },
+    {
+      "i": 31,
+      "offset": 44.3,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.852
+    },
+    {
+      "i": 32,
+      "offset": 45.72,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.498
+    },
+    {
+      "i": 33,
+      "offset": 47.16,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.627
+    },
+    {
+      "i": 34,
+      "offset": 48.58,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.482
+    },
+    {
+      "i": 35,
+      "offset": 50.0,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.636
+    },
+    {
+      "i": 36,
+      "offset": 51.44,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.371
+    },
+    {
+      "i": 37,
+      "offset": 52.87,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.493
+    },
+    {
+      "i": 38,
+      "offset": 54.29,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.743
+    },
+    {
+      "i": 39,
+      "offset": 55.72,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.548
+    },
+    {
+      "i": 40,
+      "offset": 57.16,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.445
+    },
+    {
+      "i": 41,
+      "offset": 58.59,
+      "status": 200,
+      "served_by": "local",
+      "error": null,
+      "latency": 0.408
+    }
+  ]
+}

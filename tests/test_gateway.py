@@ -98,15 +98,36 @@ def test_merged_waiters_all_see_the_failure(monkeypatch, fresh):
     assert not g.cache and not g.inflight
 
 
-@pytest.mark.parametrize("exc,status", [(g.httpx.ConnectError("x"), 502), (g.httpx.ReadTimeout("x"), 504)])
-def test_transport_errors_map_to_gateway_statuses(monkeypatch, exc, status):
+def test_all_providers_down_returns_503_with_per_provider_outcomes(monkeypatch):
+    """With the real router, a dead upstream is retried, then reported as 503 listing what was tried."""
     async def post(*a, **k):
-        raise exc
+        raise g.httpx.ConnectError("refused")
+
+    async def no_sleep(_):
+        pass
 
     monkeypatch.setattr(g, "call_upstream", REAL_UPSTREAM)
     monkeypatch.setattr(g.client, "post", post)
-    c = TestClient(g.app)
-    assert c.post("/v1/chat/completions", json=body("unique-" + str(status))).status_code == status
+    monkeypatch.setattr(g.router, "sleep", no_sleep)
+    r = TestClient(g.app).post("/v1/chat/completions", json=body("down-1"))
+    assert r.status_code == 503
+    detail = r.json()["detail"]
+    assert detail["error"] == "all providers failed"
+    assert detail["tried"][0]["provider"] == "local" and "connection error" in detail["tried"][0]["outcome"]
+
+
+def test_upstream_timeout_is_reported_as_503_after_retries(monkeypatch):
+    async def post(*a, **k):
+        raise g.httpx.ReadTimeout("slow")
+
+    async def no_sleep(_):
+        pass
+
+    monkeypatch.setattr(g, "call_upstream", REAL_UPSTREAM)
+    monkeypatch.setattr(g.client, "post", post)
+    monkeypatch.setattr(g.router, "sleep", no_sleep)
+    r = TestClient(g.app).post("/v1/chat/completions", json=body("slow-1"))
+    assert r.status_code == 503 and "timeout" in r.json()["detail"]["tried"][0]["outcome"]
 
 
 @pytest.mark.parametrize("bad", [{"messages": []}, {"messages": [{"role": "user", "content": "x"}], "max_tokens": 0},

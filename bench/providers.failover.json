@@ -1,0 +1,5 @@
+[
+  {"name": "local", "base_url": "http://127.0.0.1:18081", "model": "qwen2.5-1.5b", "timeout_s": 20, "max_attempts": 2},
+  {"name": "groq", "base_url": "https://api.groq.com/openai/v1", "model": "openai/gpt-oss-20b", "min_max_tokens": 400,
+   "api_key_env": "GROQ_API_KEY", "rpm": 30, "timeout_s": 20, "max_attempts": 2}
+]
